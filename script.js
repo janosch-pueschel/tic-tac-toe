@@ -19,7 +19,7 @@ const PlayerFactory = (
 const gameBoard = (() => {
   const gameContainer = document.querySelector("#game-container");
 
-  const render = () => {
+  function render() {
     for (let i = 1; i < 10; i++) {
       const gridCell = document.createElement("div");
       gridCell.classList.add(
@@ -32,7 +32,8 @@ const gameBoard = (() => {
       gridCell.setAttribute("index", i);
       gameContainer.appendChild(gridCell);
     }
-  };
+  }
+  render();
 
   const gridCellEvent = (status) => {
     if (status === "enable") {
@@ -192,8 +193,6 @@ const gameBoard = (() => {
 
   return { render, gridCellEvent, newGame, getPlayer };
 })();
-
-gameBoard.render();
 
 const displayController = (() => {
   const scoreBoard = document.getElementById("score-board");
