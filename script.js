@@ -1,12 +1,19 @@
 "use strict";
 
-const PlayerFactory = (playerNumber, nameId, marker, chosenFields, colorClass) => {
+const PlayerFactory = (
+  playerNumber,
+  nameId,
+  marker,
+  chosenFields,
+  colorClass
+) => {
   let name = document.getElementById(nameId).value;
   if (name === "") {
     name = "Player " + playerNumber;
   }
-  const nameTag = `<span class="text-3xl ${colorClass}">${name}</span>`;
-  return { marker, chosenFields, name, nameTag };
+  const nameTagActive = `<span class="text-3xl ${colorClass} p-3 rounded-md">${name}</span>`;
+  const nameTag = `<span class="text-3xl p-3 rounded-md">${name}</span>`;
+  return { marker, chosenFields, name, nameTagActive, nameTag, colorClass };
 };
 
 const gameBoard = (() => {
@@ -27,36 +34,36 @@ const gameBoard = (() => {
     }
   };
 
-  const gridCellEvent = () => {
-    for (let child of gameContainer.children) {
-      child.addEventListener("click", function (currentPlayer) {
-        if (winner === true) {
-          console.log("Game over.");
-          return;
-        } else if (moves === 9) {
-          console.log("Game over.");
-          return;
-        } else if (child.textContent !== "") {
-          console.log("Already taken. Choose another!");
-        } else {
-          currentPlayer = setCurrentPlayer();
-          child.innerHTML = currentPlayer.marker;
-          let index = child.getAttribute("index");
-          currentPlayer.chosenFields.push(index);
-          checkWinner(currentPlayer.name, currentPlayer.chosenFields);
-        }
-      });
+  const gridCellEvent = (status) => {
+    if (status === "enable") {
+      for (let child of gameContainer.children) {
+        child.addEventListener("click", function (currentPlayer) {
+          if (winner === true) {
+            return;
+          } else if (moves === 9) {
+            return;
+          } else if (child.textContent !== "") {
+            return;
+          } else {
+            currentPlayer = setCurrentPlayer();
+            child.innerHTML = currentPlayer.marker;
+            let index = child.getAttribute("index");
+            currentPlayer.chosenFields.push(index);
+            checkWinner(currentPlayer, currentPlayer.chosenFields);
+          }
+        });
+      }
+    } else if (status === "disable") {
+      for (let child of gameContainer.children) {
+        child.replaceWith(child.cloneNode(true));
+      }
     }
   };
 
   let playerOne;
   let playerTwo;
-  const playerForm = document.querySelector("#player-form");
+  const scoreBoard = document.getElementById("score-board");
   const playerBoard = document.createElement("p");
-  /* const playerOneEl = document.createElement("span");
-  playerOneEl.textContent = playerOne.name;
-  const playerTwoEl = document.createElement("span");
-  playerTwoEl.textContent = playerTwo.name; */
   const getPlayer = () => {
     playerOne = PlayerFactory(
       "1",
@@ -77,7 +84,7 @@ const gameBoard = (() => {
       />
     </svg>`,
       [],
-      "text-teal-400"
+      "bg-teal-400"
     );
 
     playerTwo = PlayerFactory(
@@ -96,22 +103,24 @@ const gameBoard = (() => {
       />
     </svg>`,
       [],
-      "text-indigo-400"
+      "bg-indigo-400"
     );
 
-    playerForm.innerHTML = "";
-    playerBoard.innerHTML = `${playerOne.nameTag} vs. ${playerTwo.nameTag}`;
-    console.log(playerOne.nameTag);
-    console.log(playerTwo.nameTag);
-    playerForm.appendChild(playerBoard);
+    playerBoard.innerHTML = playerOne.nameTagActive + playerTwo.nameTag;
+    playerBoard.className = "";
+    playerBoard.classList.add("w-5/6", "max-w-sm", "flex", "justify-between");
+    scoreBoard.appendChild(playerBoard);
+    displayController.displayElement(scoreBoard);
   };
 
   let currentPlayer;
   function setCurrentPlayer() {
     if (currentPlayer === playerTwo || currentPlayer === undefined) {
       currentPlayer = playerOne;
+      playerBoard.innerHTML = playerOne.nameTag + playerTwo.nameTagActive;
     } else {
       currentPlayer = playerTwo;
+      playerBoard.innerHTML = playerOne.nameTagActive + playerTwo.nameTag;
     }
     return currentPlayer;
   }
@@ -137,7 +146,18 @@ const gameBoard = (() => {
         return playerArray.includes(value);
       });
       if (conditionCheck === true) {
-        playerBoard.textContent = `${player} wins.`;
+        playerBoard.className = "";
+        playerBoard.classList.add(
+          "w-5/6",
+          "max-w-sm",
+          "flex",
+          "justify-center",
+          "text-3xl",
+          "p-3",
+          "rounded-md",
+          player.colorClass
+        );
+        playerBoard.innerHTML = `${player.name} wins.`;
         winner = true;
         return;
       }
@@ -157,7 +177,9 @@ const gameBoard = (() => {
     currentPlayer = undefined;
     winner = false;
     moves = 0;
-    playerBoard.textContent = `${playerOne.name} vs. ${playerTwo.name}`;
+    playerBoard.className = "";
+    playerBoard.classList.add("w-5/6", "max-w-sm", "flex", "justify-between");
+    playerBoard.innerHTML = playerOne.nameTagActive + playerTwo.nameTag;
   }
 
   return { render, gridCellEvent, newGame, getPlayer };
@@ -166,14 +188,40 @@ const gameBoard = (() => {
 gameBoard.render();
 
 const displayController = (() => {
+  const scoreBoard = document.getElementById("score-board");
+  const playerForm = document.getElementById("player-form");
+
   const startGameBtn = document.getElementById("start-btn");
   startGameBtn.addEventListener("click", () => {
-    gameBoard.gridCellEvent();
+    gameBoard.gridCellEvent("enable");
     gameBoard.getPlayer();
+    displayElement(newGameBtn);
+    displayElement(changePlayerBtn);
+    hideElement(playerForm);
   });
 
   const newGameBtn = document.getElementById("new-btn");
   newGameBtn.addEventListener("click", () => {
     gameBoard.newGame();
   });
+
+  const changePlayerBtn = document.getElementById("change-btn");
+  changePlayerBtn.addEventListener("click", () => {
+    displayElement(playerForm);
+    hideElement(scoreBoard);
+    hideElement(newGameBtn);
+    hideElement(changePlayerBtn);
+    gameBoard.newGame();
+    gameBoard.gridCellEvent("disable");
+  });
+
+  const displayElement = (element) => {
+    element.classList.remove("hidden");
+  };
+
+  const hideElement = (element) => {
+    element.classList.add("hidden");
+  };
+
+  return { displayElement, hideElement };
 })();
