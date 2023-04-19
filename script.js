@@ -1,11 +1,11 @@
 "use strict";
 
-const PlayerFactory = (playerNumber, nameId, marker, chosenFields, color) => {
+const PlayerFactory = (playerNumber, nameId, marker, chosenFields, colorClass) => {
   let name = document.getElementById(nameId).value;
   if (name === "") {
     name = "Player " + playerNumber;
   }
-  const nameTag = `<span class="text-3xl text-${color}">${name}</span>`;
+  const nameTag = `<span class="text-3xl ${colorClass}">${name}</span>`;
   return { marker, chosenFields, name, nameTag };
 };
 
@@ -77,7 +77,7 @@ const gameBoard = (() => {
       />
     </svg>`,
       [],
-      "teal-400"
+      "text-teal-400"
     );
 
     playerTwo = PlayerFactory(
@@ -96,7 +96,7 @@ const gameBoard = (() => {
       />
     </svg>`,
       [],
-      "indigo-400"
+      "text-indigo-400"
     );
 
     playerForm.innerHTML = "";
