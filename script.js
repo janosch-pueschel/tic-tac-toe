@@ -1,8 +1,12 @@
 "use strict";
 
-const PlayerFactory = (nameId, marker, chosenFields) => {
-  const name = document.getElementById(nameId).value;
-  return { name, marker, chosenFields };
+const PlayerFactory = (playerNumber, nameId, marker, chosenFields, color) => {
+  let name = document.getElementById(nameId).value;
+  if (name === "") {
+    name = "Player " + playerNumber;
+  }
+  const nameTag = `<span class="text-3xl text-${color}">${name}</span>`;
+  return { marker, chosenFields, name, nameTag };
 };
 
 const gameBoard = (() => {
@@ -55,6 +59,7 @@ const gameBoard = (() => {
   playerTwoEl.textContent = playerTwo.name; */
   const getPlayer = () => {
     playerOne = PlayerFactory(
+      "1",
       "player-one",
       ` <svg
       width="80%"
@@ -71,10 +76,12 @@ const gameBoard = (() => {
         stroke-linejoin="round"
       />
     </svg>`,
-      []
+      [],
+      "teal-400"
     );
 
     playerTwo = PlayerFactory(
+      "2",
       "player-two",
       `<svg
       width="80%"
@@ -88,20 +95,14 @@ const gameBoard = (() => {
         fill="#818cf8"
       />
     </svg>`,
-      []
+      [],
+      "indigo-400"
     );
 
-    if (playerOne.name === "" && playerTwo.name === "") {
-      playerOne.name = "Player 1";
-      playerTwo.name = "Player 2";
-    } else if (playerOne.name === "") {
-      playerOne.name = "Player 1";
-    } else if (playerTwo.name === "") {
-      playerTwo.name = "Player 2";
-    }
-
     playerForm.innerHTML = "";
-    playerBoard.textContent = `${playerOne.name} vs. ${playerTwo.name}`;
+    playerBoard.innerHTML = `${playerOne.nameTag} vs. ${playerTwo.nameTag}`;
+    console.log(playerOne.nameTag);
+    console.log(playerTwo.nameTag);
     playerForm.appendChild(playerBoard);
   };
 
