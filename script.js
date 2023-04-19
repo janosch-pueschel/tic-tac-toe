@@ -163,6 +163,14 @@ const gameBoard = (() => {
       }
     }
     if (conditionCheck === false && moves === 9) {
+      playerBoard.className = "";
+      playerBoard.classList.add(
+        "w-5/6",
+        "max-w-sm",
+        "flex",
+        "justify-center",
+        "text-3xl"
+      );
       playerBoard.textContent = "Tie. Try again.";
       return;
     }
